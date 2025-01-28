@@ -1,6 +1,6 @@
 local wezterm = require("wezterm")
 local act = wezterm.action
-local os = wezterm.target_triple
+local mux = wezterm.mux
 
 ---@class public_module
 local pub = {}
@@ -9,35 +9,36 @@ local plugin_dir
 
 --- checks if the user is on windows
 local is_windows = wezterm.target_triple == "x86_64-pc-windows-msvc"
+local is_linux = wezterm.target_triple == "x86_64-unknown-linux-gnu"
 local separator = is_windows and "\\" or "/"
 
 --- Checks if the plugin directory exists
 --- @return boolean
 local function directory_exists(path)
-	local success, result = pcall(wezterm.read_dir, plugin_dir .. path)
-	return success and result
+    local success, result = pcall(wezterm.read_dir, plugin_dir .. path)
+    return success and result
 end
 
 --- Returns the name of the package, used when requiring modules
 --- @return string
 function pub.get_require_path()
-	local path1 = "httpssCssZssZsgithubsDscomsZsabidibosZswezterm-sessions"
-	local path2 = "httpssCssZssZsgithubsDscomsZsabidibosZswezterm-sessionsZs"
-	return directory_exists(path2) and path2 or path1
+    local path1 = "httpssCssZssZsgithubsDscomsZsabidibosZswezterm-sessions"
+    local path2 = "httpssCssZssZsgithubsDscomsZsabidibosZswezterm-sessionsZs"
+    return directory_exists(path2) and path2 or path1
 end
 
 --- adds the wezterm plugin directory to the lua path
 local function enable_sub_modules()
-	plugin_dir = wezterm.plugin.list()[1].plugin_dir:gsub(separator .. "[^" .. separator .. "]*$", "")
-	package.path = package.path
-		.. ";"
-		.. plugin_dir
-		.. separator
-		.. pub.get_require_path()
-		.. separator
-		.. "plugin"
-		.. separator
-		.. "?.lua"
+    plugin_dir = wezterm.plugin.list()[1].plugin_dir:gsub(separator .. "[^" .. separator .. "]*$", "")
+    package.path = package.path
+        .. ";"
+        .. plugin_dir
+        .. separator
+        .. pub.get_require_path()
+        .. separator
+        .. "plugin"
+        .. separator
+        .. "?.lua"
 end
 
 enable_sub_modules()
@@ -53,6 +54,7 @@ local function display_notification(message)
 end
 
 --- Retrieves the current workspace data from the active window.
+-- @param window wezterm.Window: The active window to retrieve the workspace data from.
 -- @return table or nil: The workspace data table or nil if no active window is found.
 local function retrieve_workspace_data(window)
     local workspace_name = window:active_workspace()
@@ -120,7 +122,7 @@ local function recreate_workspace(window, workspace_data)
         if is_windows then
             -- On Windows, transform 'file:///C:/path/to/dir' to 'C:/path/to/dir'
             return working_directory:gsub("file:///", "")
-        elseif os == "x86_64-unknown-linux-gnu" then
+        elseif is_linux then
             -- On Linux, transform 'file://{computer-name}/home/{user}/path/to/dir' to '/home/{user}/path/to/dir'
             return working_directory:gsub("^.*(/home/)", "/home/")
         else
@@ -145,11 +147,16 @@ local function recreate_workspace(window, workspace_data)
     local foreground_process = initial_pane:get_foreground_process_name()
 
     -- Check if the foreground process is a shell
-    if foreground_process:find("sh") or foreground_process:find("cmd.exe") or foreground_process:find("powershell.exe") or foreground_process:find("pwsh.exe") or foreground_process:find("nu") then
+    if foreground_process then
+        if foreground_process:find("sh") or foreground_process:find("cmd.exe") or foreground_process:find("powershell.exe") or foreground_process:find("pwsh.exe") or foreground_process:find("nu") or foreground_process:find("zsh") then
+            -- Safe to close
+            initial_pane:send_text("exit\r")
+        else
+            wezterm.log_info("Active program detected. Skipping exit command for initial pane.")
+        end
+    else
         -- Safe to close
         initial_pane:send_text("exit\r")
-    else
-        wezterm.log_info("Active program detected. Skipping exit command for initial pane.")
     end
 
     -- Recreate tabs and panes from the saved state
@@ -173,13 +180,17 @@ local function recreate_workspace(window, workspace_data)
                 new_pane = new_tab:active_pane()
             else
                 local direction = 'Right'
+                -- TODO: manage size with more than two splits in same direction
+                local size = pane_data.width / (tab_data.panes[j - 1].width + pane_data.width)
                 if pane_data.left == tab_data.panes[j - 1].left then
                     direction = 'Bottom'
+                    size = pane_data.height / (tab_data.panes[j - 1].height + pane_data.height)
                 end
 
                 new_pane = new_tab:active_pane():split({
                     direction = direction,
-                    cwd = extract_path_from_dir(pane_data.cwd)
+                    cwd = extract_path_from_dir(pane_data.cwd),
+                    size = size
                 })
             end
 
@@ -194,7 +205,7 @@ local function recreate_workspace(window, workspace_data)
             if not (is_windows) then
                 if pane_data.tty:sub(- #"/bin/nvim") == "/bin/nvim" then
                     new_pane:send_text(pane_data.tty .. " ." .. "\n")
-                else
+                elseif pane_data.tty ~= "nil" then
                     -- TODO - With running npm commands (e.g a running web client) this seems to execute Node, without the arguments
                     new_pane:send_text(pane_data.tty .. "\n")
                 end
@@ -226,10 +237,11 @@ local function load_from_json_file(file_path)
     return data
 end
 
---- Loads the saved json file matching the current workspace.
-function pub.restore_state(window)
-    local workspace_name = window:active_workspace()
+--- Restores a workspace name
+function pub.restore_workspace(window, workspace_name)
+    wezterm.log_info("Restoring state for workspace: " .. workspace_name)
     local file_path = pub.save_state_dir .. "wezterm_state_" .. workspace_name .. ".json"
+    -- wezterm.log_error("WORKSPACE NAME" .. workspace_name)
 
     local workspace_data = load_from_json_file(file_path)
     if not workspace_data then
@@ -247,14 +259,65 @@ function pub.restore_state(window)
     end
 end
 
---- Allows to select which workspace to load
-function pub.load_state(window)
-    -- TODO: Implement
-    -- Placeholder for user selection logic
-    -- ...
-    -- TODO: Call the function recreate_workspace(workspace_data) to recreate the workspace
-    -- Placeholder for recreation logic...
+--- Loads the saved json file matching the current workspace.
+function pub.restore_state(window)
+    local workspace_name = window:active_workspace()
+    pub.restore_workspace(window, workspace_name)
 end
+
+function pub.get_workspaces()
+    local choices = {}
+    for dir in io.popen("ls -pa " .. pub.save_state_dir .. " | grep -v /"):lines() do
+        local w = dir:gsub("wezterm_state_", "")
+        w = w:gsub(".json", "")
+        table.insert(choices, { id = dir, label = w })
+    end
+    return choices
+end
+
+--- Allows to select which workspace to load
+function pub.load_state(window, pane)
+    local choices = pub.get_workspaces()
+
+    window:perform_action(
+        act.InputSelector({
+            action = wezterm.action_callback(function(inner_window, inner_pane, id, label)
+                if id and label then
+                    wezterm.log_info("Current ws: " .. window:active_workspace() .. " - Selected ws: " .. label)
+                    -- switch to workspace
+                    window:perform_action(
+                        act.SwitchToWorkspace {
+                            name = label,
+                        },
+                        inner_pane
+                    )
+                    wezterm.sleep_ms(2000)
+                    window:perform_action(
+                        act.EmitEvent 'wezter-sessions-switch',
+                        pane
+                    )
+                end
+            end),
+            title = "Choose Workspace",
+            description = "Select a workspace and press Enter = accept, Esc = cancel, / = filter",
+            fuzzy_description = "Workspace to switch: ",
+            choices = choices,
+            fuzzy = true,
+        }),
+        pane
+    )
+end
+
+wezterm.on("wezter-sessions-switch", function(window, pane)
+    for _, mux_win in ipairs(mux.all_windows()) do
+        if mux_win:get_workspace() == label then
+            wezterm.log_info("Found mux window", mux_win)
+            wezterm.log_info("Found mux window workspace", mux_win:gui_window())
+            wezterm.log_info("Old window workspace", window)
+        end
+    end
+    pub.restore_state(window)
+end)
 
 --- Orchestrator function to save the current workspace state.
 -- Collects workspace data, saves it to a JSON file, and displays a notification.
@@ -284,24 +347,24 @@ function pub.apply_to_config(config)
 
     table.insert(config.keys, {
         key = 's',
-        mods = 'CTRL|SHIFT',
+        mods = 'ALT',
         action = act({ EmitEvent = "save_session" }),
     })
     table.insert(config.keys, {
         key = 'l',
-        mods = 'CTRL|SHIFT',
+        mods = 'ALT',
         action = act({ EmitEvent = "load_session" }),
     })
     table.insert(config.keys, {
         key = 'r',
-        mods = 'CTRL|SHIFT',
+        mods = 'ALT',
         action = act({ EmitEvent = "restore_session" }),
     }
     )
 end
 
 wezterm.on("save_session", function(window) pub.save_state(window) end)
-wezterm.on("load_session", function(window) pub.load_state(window) end)
+wezterm.on("load_session", function(window, pane) pub.load_state(window, pane) end)
 wezterm.on("restore_session", function(window) pub.restore_state(window) end)
 
 return pub

@@ -11,7 +11,7 @@ and restore different sessions or better workspaces and later restore them.
   along with their working directories and foreground processes.
 - **restore Session** Reopens a previously saved session that matches the
   current workspace name, restoring its layout and directories.
-- **Load Session (Not implemented yet)** Allows selecting which saved session to
+- **Load Session** Allows selecting which saved session to
   load, regardless of the current workspace name.
 
 ## Installation
@@ -25,24 +25,24 @@ and restore different sessions or better workspaces and later restore them.
 
 ## Configuration
 
-2. **Event Bindings:** You can define your own or keybindings:
+2. **Event Bindings:** You can define your own keybindings:
 
     ```lua
     -- there are the default ones
     config.keys = {
         {
             key = 's',
-            mods = 'CTRL|SHIFT',
+            mods = 'ALT',
             action = act({ EmitEvent = "save_session" }),
         },
         {
             key = 'l',
-            mods = 'CTRL|SHIFT',
+            mods = 'ALT',
             action = act({ EmitEvent = "load_session" }),
         },
         {
             key = 'r',
-            mods = 'CTRL|SHIFT',
+            mods = 'ALT',
             action = act({ EmitEvent = "restore_session" }),
         },
     }
