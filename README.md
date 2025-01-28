@@ -1,6 +1,6 @@
-# WezTerm Session Manager
+# WezTerm Sessions
 
-The [WezTerm](https://wezfurlong.org/wezterm/) Session Manager is a Lua script
+The [WezTerm](https://wezfurlong.org/wezterm/) Sessions is a Lua script
 enhancement for WezTerm that provides functionality to save, load, and restore
 terminal sessions. This tool helps manage terminal sessions, its goal is to save
 and restore different sessions or better workspaces and later restore them.
@@ -81,6 +81,10 @@ implemented:
   that need to be made
 - Complex pane layouts won't be correctly restored, the current implementation
   to determine the pane position is extremely basic
+
+## Credits
+
+This project is a fork of the original [WezTerm Session Manager](https://github.com/danielcopper/wezterm-session-manager) created by [Daniel Copper](https://github.com/danielcopper).
 
 ## Contributing
 
