@@ -269,9 +269,11 @@ end
 function pub.get_workspaces()
     local choices = {}
     for dir in io.popen("ls -pa " .. pub.save_state_dir .. " | grep -v /"):lines() do
-        local w = dir:gsub("wezterm_state_", "")
-        w = w:gsub(".json", "")
-        table.insert(choices, { id = dir, label = w })
+        if string.find(dir, "wezterm_state_") then
+            local w = dir:gsub("wezterm_state_", "")
+            w = w:gsub(".json", "")
+            table.insert(choices, { id = dir, label = w })
+        end
     end
     return choices
 end
