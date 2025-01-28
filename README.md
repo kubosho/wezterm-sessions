@@ -16,47 +16,58 @@ and restore different sessions or better workspaces and later restore them.
 
 ## Installation
 
-1. **Clone the Repository** Clone the Repository into your WezTerm configuration
-   directory:
-
-   ```bash
-   git clone https://github.com/danielcopper/wezterm-session-manager.git ~/.config/wezterm/wezterm-session-manager
-   ```
-
-2. **Configure WezTerm:** Edit your 'wezterm.lua' file to include the Session
-   Manager:
+1. **Add to your wezterm config**
 
    ```lua
-   local session_manager = require("wezterm-session-manager/session-manager")
+    local sessions = wezterm.plugin.require("https://github.com/abidibo/wezterm-sessions")
+    sessions.apply_to_config(config) -- optional, this adds default keybindings
    ```
 
-3. **Setup Event Bindings:** Edit your 'wezterm.lua' to include the event
-   bindings to trigger the functions of the session manager
+## Configuration
 
-   ```lua
-   wezterm.on("save_session", function(window) session_manager.save_state(window) end)
-   wezterm.on("load_session", function(window) session_manager.load_state(window) end)
-   wezterm.on("restore_session", function(window) session_manager.restore_state(window) end)
+2. **Event Bindings:** You can define your own or keybindings:
+
+    ```lua
+    -- there are the default ones
+    config.keys = {
+        {
+            key = 's',
+            mods = 'CTRL|SHIFT',
+            action = act({ EmitEvent = "save_session" }),
+        },
+        {
+            key = 'l',
+            mods = 'CTRL|SHIFT',
+            action = act({ EmitEvent = "load_session" }),
+        },
+        {
+            key = 'r',
+            mods = 'CTRL|SHIFT',
+            action = act({ EmitEvent = "restore_session" }),
+        },
+    }
    ```
 
-4. **Set Keybindings:** Define Keybindings in your 'wezterm.lua' for saving,
-   restoring and loading sessions:
+3. I also recommend to set up a keybinding for creating **named** workspaces or rename the current one:
 
-   ```lua
-   local wezterm = require 'wezterm';
-   return {
-     keys = {
-      {key = "S", mods = "LEADER", action = wezterm.action{EmitEvent = "save_session"}},
-      {key = "L", mods = "LEADER", action = wezterm.action{EmitEvent = "load_session"}},
-      {key = "R", mods = "LEADER", action = wezterm.action{EmitEvent = "restore_session"}},
-     },
-   }
-   ```
-
-5. I also recommend to set up a keybinding for creating **named** workspaces as
-   explained
-   [here](https://wezfurlong.org/wezterm/config/lua/keyassignment/SwitchToWorkspace.html).
-   This helps managing and switching states.
+    ````lua 
+    -- Rename current workspace
+    {
+        key = '$',
+        mods = 'CTRL|SHIFT',
+        action = act.PromptInputLine {
+            description = 'Enter new workspace name',
+            action = wezterm.action_callback(
+                function(window, pane, line)
+                    if line then
+                        wezterm.mux.rename_workspace(wezterm.mux.get_active_workspace(), line)
+                    end
+                end
+            ),
+        },
+    },
+    ```
+   
 
 ## Limitations
 
