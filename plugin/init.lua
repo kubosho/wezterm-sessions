@@ -265,6 +265,7 @@ function pub.restore_state(window)
     pub.restore_workspace(window, workspace_name)
 end
 
+--- Returns the list of available workspaces
 function pub.get_workspaces()
     local choices = {}
     for dir in io.popen("ls -pa " .. pub.save_state_dir .. " | grep -v /"):lines() do
@@ -309,13 +310,6 @@ function pub.load_state(window, pane)
 end
 
 wezterm.on("wezter-sessions-switch", function(window, pane)
-    for _, mux_win in ipairs(mux.all_windows()) do
-        if mux_win:get_workspace() == label then
-            wezterm.log_info("Found mux window", mux_win)
-            wezterm.log_info("Found mux window workspace", mux_win:gui_window())
-            wezterm.log_info("Old window workspace", window)
-        end
-    end
     pub.restore_state(window)
 end)
 
