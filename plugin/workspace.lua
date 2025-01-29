@@ -120,7 +120,9 @@ function ws.recreate_workspace(window, workspace_data)
                     direction = 'Bottom'
                     size = pane_data.height / (tab_data.panes[j - 1].height + pane_data.height)
                 end
+                wezterm.log_info("Direction: " .. direction .. " Size: " .. size .. ' Width ' .. pane_data.width .. ' Prev width' .. tab_data.panes[j - 1].width)
 
+                wezterm.sleep_ms(100)
                 new_pane = new_tab:active_pane():split({
                     direction = direction,
                     cwd = extract_path_from_dir(pane_data.cwd),
