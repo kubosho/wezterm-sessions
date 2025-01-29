@@ -8,7 +8,12 @@ function w.restore_window(window, win_data)
 
     -- Check if the foreground process is a shell
     if foreground_process then
-        if foreground_process:find("sh") or foreground_process:find("cmd.exe") or foreground_process:find("powershell.exe") or foreground_process:find("pwsh.exe") or foreground_process:find("nu") or foreground_process:find("zsh") then
+        if foreground_process:find("sh") or
+           foreground_process:find("cmd.exe") or
+           foreground_process:find("powershell.exe") or
+           foreground_process:find("pwsh.exe") or
+           foreground_process:find("nu") or
+           foreground_process:find("zsh") then
             -- Safe to close
             initial_pane:send_text("exit\r")
         else
