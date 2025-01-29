@@ -66,7 +66,7 @@ function pub.load_state(window, pane)
                     -- switch to workspace
                     window:perform_action(
                         act.SwitchToWorkspace {
-                            name = fs.unescape_file_name(label),
+                            name = label,
                         },
                         inner_pane
                     )
@@ -116,7 +116,7 @@ function pub.delete_state(window, pane)
             action = wezterm.action_callback(function(inner_window, inner_pane, id, label)
                 if id and label then
                     wezterm.log_info("Deleting ws: " .. label)
-                    local file_path = save_state_dir .. "wezterm_state_" .. label .. ".json"
+                    local file_path = save_state_dir .. "wezterm_state_" .. fs.escape_file_name(label) .. ".json"
                     if fs.delete_json_file(file_path) then
                         window:toast_notification('WezTerm Sessions', 'Workspace state deleted successfully', nil, 4000)
                     else

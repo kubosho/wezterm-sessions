@@ -181,7 +181,7 @@ function ws.get_workspaces(dir)
         if string.find(d, "wezterm_state_") then
             local w = d:gsub("wezterm_state_", "")
             w = w:gsub(".json", "")
-            table.insert(choices, { id = d, label = w })
+            table.insert(choices, { id = d, label = fs.unescape_file_name(w) })
         end
     end
     return choices
