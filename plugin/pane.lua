@@ -1,8 +1,27 @@
 local wezterm = require("wezterm")
 local fs = require('fs')
-local p = {}
+local pub = {}
 
-function p.restore_pane(window, tab, tab_data, j, pane_data)
+--- Retrieve pane data
+-- @param pane_info table: The pane information table.
+function pub.retrieve_pane_data(pane_info)
+    return {
+        pane_id = tostring(pane_info.pane:pane_id()),
+        index = pane_info.index,
+        is_active = pane_info.is_active,
+        is_zoomed = pane_info.is_zoomed,
+        left = pane_info.left,
+        top = pane_info.top,
+        width = pane_info.width,
+        height = pane_info.height,
+        pixel_width = pane_info.pixel_width,
+        pixel_height = pane_info.pixel_height,
+        cwd = tostring(pane_info.pane:get_current_working_dir()),
+        tty = tostring(pane_info.pane:get_foreground_process_name())
+    }
+end
+
+function pub.restore_pane(window, tab, tab_data, j, pane_data)
     local new_pane
     if j == 1 then
         new_pane = tab:active_pane()
@@ -41,4 +60,4 @@ function p.restore_pane(window, tab, tab_data, j, pane_data)
     end
 end
 
-return p
+return pub

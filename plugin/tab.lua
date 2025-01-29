@@ -15,21 +15,11 @@ function pub.retrieve_tab_data(tab)
     -- Iterate over panes in the current tab
     for _, pane_info in ipairs(tab:panes_with_info()) do
         -- Collect pane details, including layout and process information
-        table.insert(tab_data.panes, {
-            pane_id = tostring(pane_info.pane:pane_id()),
-            index = pane_info.index,
-            is_active = pane_info.is_active,
-            is_zoomed = pane_info.is_zoomed,
-            left = pane_info.left,
-            top = pane_info.top,
-            width = pane_info.width,
-            height = pane_info.height,
-            pixel_width = pane_info.pixel_width,
-            pixel_height = pane_info.pixel_height,
-            cwd = tostring(pane_info.pane:get_current_working_dir()),
-            tty = tostring(pane_info.pane:get_foreground_process_name())
-        })
+        local pane_data = p.retrieve_pane_data(pane_info)
+        table.insert(tab_data.panes, pane_data)
     end
+
+    return tab_data
 end
 
 function pub.restore_tab(window, tab_data)
