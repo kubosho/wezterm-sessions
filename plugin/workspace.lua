@@ -140,7 +140,7 @@ function ws.recreate_workspace(window, workspace_data)
             -- This could probably be handled better in general
             if not (is_windows) then
                 if pane_data.tty:sub(- #"/bin/nvim") == "/bin/nvim" then
-                    new_pane:send_text(pane_data.tty .. " ." .. "\n")
+                    new_pane:send_text(pane_data.tty .. "\n")
                 elseif pane_data.tty ~= "nil" then
                     -- TODO - With running npm commands (e.g a running web client) this seems to execute Node, without the arguments
                     new_pane:send_text(pane_data.tty .. "\n")
