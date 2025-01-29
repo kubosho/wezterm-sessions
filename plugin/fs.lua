@@ -3,6 +3,7 @@ local fs = {}
 
 --- checks if the user is on windows
 local is_windows = wezterm.target_triple == "x86_64-pc-windows-msvc"
+local is_linux = wezterm.target_triple == "x86_64-unknown-linux-gnu"
 local separator = is_windows and "\\" or "/"
 
 --- Saves data to a JSON file.
@@ -24,7 +25,6 @@ function fs.save_to_json_file(data, file_path)
         return false
     end
 end
-
 
 --- Loads data from a JSON file.
 -- @param file_path string: The file path from which the JSON data will be loaded.
@@ -66,6 +66,18 @@ end
 function fs.unescape_file_name(file_name)
     local s = file_name:gsub("+", separator)
     return s
+end
+
+function fs.extract_path_from_dir(working_directory)
+    if is_windows then
+        -- On Windows, transform 'file:///C:/path/to/dir' to 'C:/path/to/dir'
+        return working_directory:gsub("file:///", "")
+    elseif is_linux then
+        -- On Linux, transform 'file://{computer-name}/home/{user}/path/to/dir' to '/home/{user}/path/to/dir'
+        return working_directory:gsub("^.*(/home/)", "/home/")
+    else
+        return working_directory:gsub("^.*(/Users/)", "/Users/")
+    end
 end
 
 return fs
