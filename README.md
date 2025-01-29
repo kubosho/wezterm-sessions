@@ -84,7 +84,7 @@ implemented:
 - The script does not restore the state of running applications within each pane
   (except nvim on linux which seems to work fine but the general handling should
   be improved)
-- It' primarily tested on Linux and Windows, expect some bugs or adjustements
+- It' primarily tested on Linux, expect some bugs or adjustements
   that need to be made
 - Complex pane layouts won't be correctly restored, the current implementation
   to determine the pane position is extremely basic
