@@ -1,6 +1,7 @@
 local wezterm = require("wezterm")
 local fs = require('fs')
 local win = require('window')
+local utils = require('utils')
 
 local ws = {}
 
@@ -61,6 +62,8 @@ function ws.retrieve_workspace_data(window)
 end
 
 --- Recreates the workspace based on the provided data.
+-- @param window wezterm.Window: The active window to recreate the workspace in.
+-- @param workspace_name string: The name of the workspace to recreate.
 -- @param workspace_data table: The data structure containing the saved workspace state.
 function ws.recreate_workspace(window, workspace_name, workspace_data)
     if not workspace_data or not workspace_data.windows then
@@ -71,32 +74,18 @@ function ws.recreate_workspace(window, workspace_name, workspace_data)
     local tabs = window:mux_window():tabs()
 
     if #tabs ~= 1 or #tabs[1]:panes() ~= 1 then
-        wezterm.log_info(
-            "Restoration can only be performed in a window with a single tab and a single pane, to prevent accidental data loss.")
+        wezterm.log_info("Restoration can only be performed in a window with a single tab and a single pane")
+        utils.notify(window, 'Restoration can only be performed in a window with a single tab and a single pane')
         return
-    end
-
-    local initial_pane = window:active_pane()
-    local foreground_process = initial_pane:get_foreground_process_name()
-
-    -- Check if the foreground process is a shell
-    if foreground_process then
-        if foreground_process:find("sh") or foreground_process:find("cmd.exe") or foreground_process:find("powershell.exe") or foreground_process:find("pwsh.exe") or foreground_process:find("nu") or foreground_process:find("zsh") then
-            -- Safe to close
-            initial_pane:send_text("exit\r")
-        else
-            wezterm.log_info("Active program detected. Skipping exit command for initial pane.")
-        end
-    else
-        -- Safe to close
-        initial_pane:send_text("exit\r")
     end
 
     -- Recreate windows tabs and panes from the saved state
     for idx, win_data in ipairs(workspace_data.windows) do
         if idx == 1 then
+            -- The first window will be restored in the current window
             win.restore_window(window, win_data)
         else
+            -- All other windows will be spawned in a new window
             local _, _, w = wezterm.mux.spawn_window({
                 workspace = workspace_name,
             })
@@ -115,17 +104,14 @@ function ws.restore_workspace(window, dir, workspace_name)
 
     local workspace_data = fs.load_from_json_file(file_path)
     if not workspace_data then
-        window:toast_notification('WezTerm',
-            'Workspace state file not found for workspace: ' .. workspace_name, nil, 4000)
+        utils.notify(window, 'Workspace state file not found for workspace: ' .. workspace_name)
         return
     end
 
     if ws.recreate_workspace(window, workspace_name, workspace_data) then
-        window:toast_notification('WezTerm', 'Workspace state loaded for workspace: ' .. workspace_name,
-            nil, 4000)
+        utils.notify(window, 'Workspace state loaded for workspace: ' .. workspace_name)
     else
-        window:toast_notification('WezTerm', 'Workspace state loading failed for workspace: ' .. workspace_name,
-            nil, 4000)
+        utils.notify(window, 'Workspace state loading failed for workspace: ' .. workspace_name)
     end
 end
 
