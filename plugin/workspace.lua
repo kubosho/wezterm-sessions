@@ -20,40 +20,7 @@ function ws.retrieve_workspace_data(window)
     -- Iterale over windows
     for _, mux_win in ipairs(wezterm.mux.all_windows()) do
         if mux_win:get_workspace() == workspace_name then
-            local win_data = {
-                title = mux_win:get_title(),
-                tabs = {}
-            }
-
-            -- Iterate over tabs in the current window
-            for _, tab in ipairs(mux_win:tabs()) do
-                local tab_data = {
-                    tab_id = tostring(tab:tab_id()),
-                    panes = {}
-                }
-
-                -- Iterate over panes in the current tab
-                for _, pane_info in ipairs(tab:panes_with_info()) do
-                    -- Collect pane details, including layout and process information
-                    table.insert(tab_data.panes, {
-                        pane_id = tostring(pane_info.pane:pane_id()),
-                        index = pane_info.index,
-                        is_active = pane_info.is_active,
-                        is_zoomed = pane_info.is_zoomed,
-                        left = pane_info.left,
-                        top = pane_info.top,
-                        width = pane_info.width,
-                        height = pane_info.height,
-                        pixel_width = pane_info.pixel_width,
-                        pixel_height = pane_info.pixel_height,
-                        cwd = tostring(pane_info.pane:get_current_working_dir()),
-                        tty = tostring(pane_info.pane:get_foreground_process_name())
-                    })
-                end
-
-                table.insert(win_data.tabs, tab_data)
-            end
-
+            local win_data = win.retrieve_window_data(mux_win)
             table.insert(workspace_data.windows, win_data)
         end
     end
