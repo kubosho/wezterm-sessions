@@ -62,7 +62,7 @@ function pub.load_state(window, pane)
         act.InputSelector({
             action = wezterm.action_callback(function(inner_window, inner_pane, id, label)
                 if id and label then
-                    wezterm.log_info("Current ws: " .. window:active_workspace() .. " - Selected ws: " .. label)
+                    wezterm.log_info("Switching to ws: " .. label)
                     -- switch to workspace
                     window:perform_action(
                         act.SwitchToWorkspace {
@@ -101,10 +101,37 @@ function pub.save_state(window)
 
     -- Save the workspace data to a JSON file and display the appropriate notification
     if fs.save_to_json_file(data, file_path) then
-        window:toast_notification('WezTerm Session Manager', 'Workspace state saved successfully', nil, 4000)
+        window:toast_notification('WezTerm Sessions', 'Workspace state saved successfully', nil, 4000)
     else
-        window:toast_notification('WezTerm Session Manager', 'Failed to save workspace state', nil, 4000)
+        window:toast_notification('WezTerm Sessions', 'Failed to save workspace state', nil, 4000)
     end
+end
+
+--- Allows to select which workspace to delete
+function pub.delete_state(window, pane)
+    local choices = ws.get_workspaces(save_state_dir)
+
+    window:perform_action(
+        act.InputSelector({
+            action = wezterm.action_callback(function(inner_window, inner_pane, id, label)
+                if id and label then
+                    wezterm.log_info("Deleting ws: " .. label)
+                    local file_path = save_state_dir .. "wezterm_state_" .. label .. ".json"
+                    if fs.delete_json_file(file_path) then
+                        window:toast_notification('WezTerm Sessions', 'Workspace state deleted successfully', nil, 4000)
+                    else
+                        window:toast_notification('WezTerm Sessions', 'Failed to delete workspace state', nil, 4000)
+                    end
+                end
+            end),
+            title = "Choose Workspace to delete",
+            description = "Select a workspace and press Enter = accept, Esc = cancel, / = filter",
+            fuzzy_description = "Workspace to delete: ",
+            choices = choices,
+            fuzzy = true,
+        }),
+        pane
+    )
 end
 
 ---sets default keybindings
@@ -131,12 +158,17 @@ function pub.apply_to_config(config)
         key = 'r',
         mods = 'ALT',
         action = act({ EmitEvent = "restore_session" }),
-    }
-    )
+    })
+    table.insert(config.keys, {
+        key = 'd',
+        mods = 'CTRL|SHIFT',
+        action = act({ EmitEvent = "delete_session" }),
+    })
 end
 
 wezterm.on("save_session", function(window) pub.save_state(window) end)
 wezterm.on("load_session", function(window, pane) pub.load_state(window, pane) end)
 wezterm.on("restore_session", function(window) pub.restore_state(window) end)
+wezterm.on("delete_session", function(window, pane) pub.delete_state(window, pane) end)
 
 return pub

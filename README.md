@@ -9,10 +9,12 @@ and restore different sessions or better workspaces and later restore them.
 
 - **Save Session State** Captures the current layout of windows, tabs and panes,
   along with their working directories and foreground processes.
-- **restore Session** Reopens a previously saved session that matches the
+- **Restore Session** Reopens a previously saved session that matches the
   current workspace name, restoring its layout and directories.
 - **Load Session** Allows selecting which saved session to
   load, regardless of the current workspace name.
+- **Delete Session State** Allows selecting which saved session to
+  delete, regardless of the current workspace name.
 
 ## Installation
 
@@ -44,6 +46,11 @@ and restore different sessions or better workspaces and later restore them.
             key = 'r',
             mods = 'ALT',
             action = act({ EmitEvent = "restore_session" }),
+        },
+        {
+            key = 'd',
+            mods = 'CTRL|SHIFT',
+            action = act({ EmitEvent = "delete_session" }),
         },
     }
    ```

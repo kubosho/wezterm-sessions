@@ -42,4 +42,10 @@ function fs.load_from_json_file(file_path)
     return data
 end
 
+--- Deletes the JSON file.
+-- @param file_path string: The file path of the JSON file to be deleted.
+function fs.delete_json_file(file_path)
+    return os.remove(file_path)
+end
+
 return fs
