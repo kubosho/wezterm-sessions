@@ -1,6 +1,10 @@
 local wezterm = require("wezterm")
 local fs = {}
 
+--- checks if the user is on windows
+local is_windows = wezterm.target_triple == "x86_64-pc-windows-msvc"
+local separator = is_windows and "\\" or "/"
+
 --- Saves data to a JSON file.
 -- @param data table: The workspace data to be saved.
 -- @param file_path string: The file path where the JSON file will be saved.
@@ -46,6 +50,22 @@ end
 -- @param file_path string: The file path of the JSON file to be deleted.
 function fs.delete_json_file(file_path)
     return os.remove(file_path)
+end
+
+--- Returns the escaped file name
+--- @param file_name string
+--- @return string
+function fs.escape_file_name(file_name)
+    local s = file_name:gsub(separator, "+")
+    return s
+end
+
+--- Returns the unescaped file name
+--- @param file_name string
+--- @return string
+function fs.unescape_file_name(file_name)
+    local s = file_name:gsub("+", separator)
+    return s
 end
 
 return fs

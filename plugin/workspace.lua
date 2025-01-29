@@ -154,7 +154,7 @@ end
 --- Restores a workspace name
 function ws.restore_workspace(window, dir, workspace_name)
     wezterm.log_info("Restoring state for workspace: " .. workspace_name)
-    local file_path = dir .. "wezterm_state_" .. workspace_name .. ".json"
+    local file_path = dir .. "wezterm_state_" .. fs.escape_file_name(workspace_name) .. ".json"
 
     local workspace_data = fs.load_from_json_file(file_path)
     if not workspace_data then

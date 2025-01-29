@@ -66,7 +66,7 @@ function pub.load_state(window, pane)
                     -- switch to workspace
                     window:perform_action(
                         act.SwitchToWorkspace {
-                            name = label,
+                            name = fs.unescape_file_name(label),
                         },
                         inner_pane
                     )
@@ -97,7 +97,7 @@ function pub.save_state(window)
     local data = ws.retrieve_workspace_data(window)
 
     -- Construct the file path based on the workspace name
-    local file_path = save_state_dir .. "wezterm_state_" .. data.name .. ".json"
+    local file_path = save_state_dir .. "wezterm_state_" .. fs.escape_file_name(data.name) .. ".json"
 
     -- Save the workspace data to a JSON file and display the appropriate notification
     if fs.save_to_json_file(data, file_path) then
