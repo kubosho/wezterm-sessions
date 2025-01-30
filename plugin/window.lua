@@ -1,5 +1,5 @@
 local wezterm = require("wezterm")
-local t = require('tab')
+local tab_mod = require('tab')
 local pub = {}
 
 --- Retrieves the current window data from the provided mux window.
@@ -13,7 +13,7 @@ function pub.retrieve_window_data(mux_window)
 
     -- Iterate over tabs in the current window
     for _, tab in ipairs(mux_window:tabs()) do
-        local tab_data = t.retrieve_tab_data(tab)
+        local tab_data = tab_mod.retrieve_tab_data(tab)
         table.insert(win_data.tabs, tab_data)
     end
 
@@ -43,7 +43,7 @@ function pub.restore_window(window, win_data)
     end
 
     for _, tab_data in ipairs(win_data.tabs) do
-        t.restore_tab(window, tab_data)
+        tab_mod.restore_tab(window, tab_data)
     end
 end
 

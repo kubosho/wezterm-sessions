@@ -1,6 +1,6 @@
 local wezterm = require("wezterm")
 local fs = require('fs')
-local win = require('window')
+local win_mod = require('window')
 local utils = require('utils')
 
 local ws = {}
@@ -20,7 +20,7 @@ function ws.retrieve_workspace_data(window)
     -- Iterale over windows
     for _, mux_win in ipairs(wezterm.mux.all_windows()) do
         if mux_win:get_workspace() == workspace_name then
-            local win_data = win.retrieve_window_data(mux_win)
+            local win_data = win_mod.retrieve_window_data(mux_win)
             table.insert(workspace_data.windows, win_data)
         end
     end
@@ -50,13 +50,13 @@ function ws.recreate_workspace(window, workspace_name, workspace_data)
     for idx, win_data in ipairs(workspace_data.windows) do
         if idx == 1 then
             -- The first window will be restored in the current window
-            win.restore_window(window, win_data)
+            win_mod.restore_window(window, win_data)
         else
             -- All other windows will be spawned in a new window
             local _, _, w = wezterm.mux.spawn_window({
                 workspace = workspace_name,
             })
-            win.restore_window(w:gui_window(), win_data)
+            win_mod.restore_window(w:gui_window(), win_data)
         end
     end
 

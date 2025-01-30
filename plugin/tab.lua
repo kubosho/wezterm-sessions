@@ -91,39 +91,44 @@ function pub.restore_panes(window, tab, tab_data)
 
     -- sleep is needed to let pane focus have effect
     for idx, p in ipairs(panes) do
+        -- restore first pane
+        if idx == 1 then
+            pane_mod.restore_pane(window, p, tab_data.panes[1])
+        end
+
         wezterm.sleep_ms(200)
         p:activate()
         wezterm.sleep_ms(200)
-        local hpanel = find_horizontal_split(ipanes[idx], tab_data)
-        if hpanel ~= nil then
+        local hpane = find_horizontal_split(ipanes[idx], tab_data)
+        if hpane ~= nil then
             wezterm.log_info("Split horizontally", ipanes[idx].top, ipanes[idx].left)
-            wezterm.log_info("Restoring pane", tab_width, ipanes[idx].left, hpanel.left)
+            wezterm.log_info("Restoring pane", tab_width, ipanes[idx].left, hpane.left)
             local available_width = tab_width - ipanes[idx].left
             local new_pane = tab:active_pane():split({
                 direction = 'Right',
-                cwd = fs.extract_path_from_dir(hpanel.cwd),
-                size = 1 - ((hpanel.left - ipanes[idx].left) / available_width)
+                cwd = fs.extract_path_from_dir(hpane.cwd),
+                size = 1 - ((hpane.left - ipanes[idx].left) / available_width)
             })
-            table.insert(ipanes, hpanel)
+            table.insert(ipanes, hpane)
             table.insert(panes, new_pane)
-            pane_mod.restore_pane(window, new_pane, hpanel)
+            pane_mod.restore_pane(window, new_pane, hpane)
         end
         wezterm.sleep_ms(200)
         p:activate()
         wezterm.sleep_ms(200)
 
-        local vpanel = find_vertical_split(ipanes[idx], tab_data)
-        if vpanel ~= nil then
+        local vpane = find_vertical_split(ipanes[idx], tab_data)
+        if vpane ~= nil then
             wezterm.log_info("Split vertically", ipanes[idx].top, ipanes[idx].left)
             local available_height = tab_height - ipanes[idx].top
             local new_pane = tab:active_pane():split({
                 direction = 'Bottom',
-                cwd = fs.extract_path_from_dir(vpanel.cwd),
-                size = 1 - ((vpanel.top - ipanes[idx].top) / available_height)
+                cwd = fs.extract_path_from_dir(vpane.cwd),
+                size = 1 - ((vpane.top - ipanes[idx].top) / available_height)
             })
-            table.insert(ipanes, vpanel)
+            table.insert(ipanes, vpane)
             table.insert(panes, new_pane)
-            pane_mod.restore_pane(window, new_pane, vpanel)
+            pane_mod.restore_pane(window, new_pane, vpane)
         end
     end
 
