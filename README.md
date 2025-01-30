@@ -5,6 +5,8 @@ enhancement for WezTerm that provides functionality to save, load, and restore
 terminal sessions. This tool helps manage terminal sessions, its goal is to save
 and restore different sessions or better workspaces and later restore them.
 
+![WezTerm Sessions](./screen.gif)
+
 ## Features
 
 - **Save Session State** Captures the current layout of windows, tabs and panes,
