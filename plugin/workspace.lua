@@ -3,14 +3,15 @@ local fs = require('fs')
 local win_mod = require('window')
 local utils = require('utils')
 
-local ws = {}
+local pub = {}
 
+--- Checks if the user is on windows
 local is_windows = wezterm.target_triple == "x86_64-pc-windows-msvc"
 
 --- Retrieves the current workspace data from the active window.
 -- @param window wezterm.Window: The active window to retrieve the workspace data from.
 -- @return table or nil: The workspace data table or nil if no active window is found.
-function ws.retrieve_workspace_data(window)
+function pub.retrieve_workspace_data(window)
     local workspace_name = window:active_workspace()
     local workspace_data = {
         name = workspace_name,
@@ -32,7 +33,7 @@ end
 -- @param window wezterm.Window: The active window to recreate the workspace in.
 -- @param workspace_name string: The name of the workspace to recreate.
 -- @param workspace_data table: The data structure containing the saved workspace state.
-function ws.recreate_workspace(window, workspace_name, workspace_data)
+function pub.recreate_workspace(window, workspace_name, workspace_data)
     if not workspace_data or not workspace_data.windows then
         wezterm.log_info("Invalid or empty workspace data provided.")
         return
@@ -65,7 +66,7 @@ function ws.recreate_workspace(window, workspace_name, workspace_data)
 end
 
 --- Restores a workspace name
-function ws.restore_workspace(window, dir, workspace_name)
+function pub.restore_workspace(window, dir, workspace_name)
     wezterm.log_info("Restoring state for workspace: " .. workspace_name)
     local file_path = dir .. "wezterm_state_" .. fs.escape_file_name(workspace_name) .. ".json"
 
@@ -75,7 +76,7 @@ function ws.restore_workspace(window, dir, workspace_name)
         return
     end
 
-    if ws.recreate_workspace(window, workspace_name, workspace_data) then
+    if pub.recreate_workspace(window, workspace_name, workspace_data) then
         utils.notify(window, 'Workspace state loaded for workspace: ' .. workspace_name)
     else
         utils.notify(window, 'Workspace state loading failed for workspace: ' .. workspace_name)
@@ -85,7 +86,7 @@ end
 --- Returns the list of available workspaces
 --- @param dir string
 --- @return table
-function ws.get_workspaces(dir)
+function pub.get_workspaces(dir)
     local choices = {}
     for d in io.popen("ls -pa " .. dir .. " | grep -v /"):lines() do
         if string.find(d, "wezterm_state_") then
@@ -97,4 +98,4 @@ function ws.get_workspaces(dir)
     return choices
 end
 
-return ws
+return pub
