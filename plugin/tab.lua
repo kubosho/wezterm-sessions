@@ -98,8 +98,8 @@ local function get_tab_height(tab_data)
 end
 
 --- Splits the active pane horizontally
---- @param window unknown: The window to split the pane in.
---- @param tab unknown: The tab to split the pane in.
+--- @param window any: The window to split the pane in.
+--- @param tab any: The tab to split the pane in.
 --- @param tab_width number: The width of the tab.
 --- @param ipanes table: The table of panes data stored for the tab
 --- @param ipane table: The pane data to be split
@@ -120,8 +120,8 @@ local function split_horizontally(window, tab, tab_width, ipanes, ipane, panes, 
 end
 
 --- Splits the active pane vertically
---- @param window unknown: The window to split the pane in.
---- @param tab unknown: The tab to split the pane in.
+--- @param window any: The window to split the pane in.
+--- @param tab any: The tab to split the pane in.
 --- @param tab_height number: The width of the tab.
 --- @param ipanes table: The table of panes data stored for the tab
 --- @param ipane table: The pane data to be split
