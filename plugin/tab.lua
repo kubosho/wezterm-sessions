@@ -148,6 +148,11 @@ end
 
 
 --- Restores all tab panes from the provided tab data
+--- Algorithm:
+--- For each pane we understand if it was horizontally and/or vertically splitted
+--- We try to understand from splits indexes which split should be performed first
+--- Then we split it horizontally and/or vertically in the found order
+--- The new created panes are stacked on a list and the process continues along the stack
 function pub.restore_panes(window, tab, tab_data)
     -- keeps track of actually created panes data
     local ipanes = { tab_data.panes[1] }
