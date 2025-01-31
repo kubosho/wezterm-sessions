@@ -48,11 +48,12 @@ end
 
 --- Deletes the JSON file.
 -- @param file_path string: The file path of the JSON file to be deleted.
+-- @return boolean: true if deletion was successful, false otherwise.
 function fs.delete_json_file(file_path)
     return os.remove(file_path)
 end
 
---- Returns the escaped file name
+--- Returns the escaped file name: os separator must be escaped if using it in the file name
 --- @param file_name string
 --- @return string
 function fs.escape_file_name(file_name)
@@ -68,6 +69,9 @@ function fs.unescape_file_name(file_name)
     return s
 end
 
+--- Retrieve the path from the working directory
+--- @param working_directory string
+--- @return string, integer
 function fs.extract_path_from_dir(working_directory)
     if is_windows then
         -- On Windows, transform 'file:///C:/path/to/dir' to 'C:/path/to/dir'
