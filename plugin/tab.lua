@@ -44,22 +44,26 @@ end
 
 local function find_horizontal_split(p, tab_data)
     local spanel = nil
-    for _, pane_data in ipairs(tab_data.panes) do
+    local idx = nil
+    for j, pane_data in ipairs(tab_data.panes) do
         if pane_data.top == p.top and pane_data.left == (p.left + p.width + 1) then
             spanel = pane_data
+            idx = j
         end
     end
-    return spanel
+    return spanel, idx
 end
 
 local function find_vertical_split(p, tab_data)
     local spanel = nil
-    for _, pane_data in ipairs(tab_data.panes) do
+    local idx = nil
+    for j, pane_data in ipairs(tab_data.panes) do
         if pane_data.left == p.left and pane_data.top == (p.top + p.height + 1) then
             spanel = pane_data
+            idx = j
         end
     end
-    return spanel
+    return spanel, idx
 end
 
 local function get_tab_width(tab_data)
@@ -82,10 +86,44 @@ local function get_tab_height(tab_data)
     return height
 end
 
+local function split_horizontally(window, tab, tab_width, ipanes, ipane, panes, hpane)
+    wezterm.log_info("Split horizontally", ipane.top, ipane.left)
+    wezterm.log_info("Restoring pane", tab_width, ipane.left, hpane.left)
+    local available_width = tab_width - ipane.left
+    local new_pane = tab:active_pane():split({
+        direction = 'Right',
+        cwd = fs.extract_path_from_dir(hpane.cwd),
+        size = 1 - ((hpane.left - ipane.left) / available_width)
+    })
+    table.insert(ipanes, hpane)
+    table.insert(panes, new_pane)
+    pane_mod.restore_pane(window, new_pane, hpane)
+end
+
+local function split_vertically(window, tab, tab_height, ipanes, ipane, panes, vpane)
+    wezterm.log_info("Split vertically", ipane.top, ipane.left)
+    local available_height = tab_height - ipane.top
+    local new_pane = tab:active_pane():split({
+        direction = 'Bottom',
+        cwd = fs.extract_path_from_dir(vpane.cwd),
+        size = 1 - ((vpane.top - ipane.top) / available_height)
+    })
+    table.insert(ipanes, vpane)
+    table.insert(panes, new_pane)
+    pane_mod.restore_pane(window, new_pane, vpane)
+end
+
+local function activate_panel(p)
+    wezterm.sleep_ms(200)
+    p:activate()
+    wezterm.sleep_ms(200)
+end
+
+
 function pub.restore_panes(window, tab, tab_data)
     -- keeps track of actually created panes
-    local ipanes = {tab_data.panes[1]}
-    local panes = {tab:active_pane()}
+    local ipanes = { tab_data.panes[1] }
+    local panes = { tab:active_pane() }
     local tab_width = get_tab_width(tab_data)
     local tab_height = get_tab_height(tab_data)
 
@@ -96,39 +134,24 @@ function pub.restore_panes(window, tab, tab_data)
             pane_mod.restore_pane(window, p, tab_data.panes[1])
         end
 
-        wezterm.sleep_ms(200)
-        p:activate()
-        wezterm.sleep_ms(200)
-        local hpane = find_horizontal_split(ipanes[idx], tab_data)
-        if hpane ~= nil then
-            wezterm.log_info("Split horizontally", ipanes[idx].top, ipanes[idx].left)
-            wezterm.log_info("Restoring pane", tab_width, ipanes[idx].left, hpane.left)
-            local available_width = tab_width - ipanes[idx].left
-            local new_pane = tab:active_pane():split({
-                direction = 'Right',
-                cwd = fs.extract_path_from_dir(hpane.cwd),
-                size = 1 - ((hpane.left - ipanes[idx].left) / available_width)
-            })
-            table.insert(ipanes, hpane)
-            table.insert(panes, new_pane)
-            pane_mod.restore_pane(window, new_pane, hpane)
-        end
-        wezterm.sleep_ms(200)
-        p:activate()
-        wezterm.sleep_ms(200)
+        activate_panel(p)
 
-        local vpane = find_vertical_split(ipanes[idx], tab_data)
-        if vpane ~= nil then
-            wezterm.log_info("Split vertically", ipanes[idx].top, ipanes[idx].left)
-            local available_height = tab_height - ipanes[idx].top
-            local new_pane = tab:active_pane():split({
-                direction = 'Bottom',
-                cwd = fs.extract_path_from_dir(vpane.cwd),
-                size = 1 - ((vpane.top - ipanes[idx].top) / available_height)
-            })
-            table.insert(ipanes, vpane)
-            table.insert(panes, new_pane)
-            pane_mod.restore_pane(window, new_pane, vpane)
+        local hpane, hj = find_horizontal_split(ipanes[idx], tab_data)
+        local vpane, vj = find_vertical_split(ipanes[idx], tab_data)
+
+        if hj ~= nil and (vj == nil or vj < hj) then -- I though here should be vj < hj but it works this way
+            split_horizontally(window, tab, tab_width, ipanes, ipanes[idx], panes, hpane)
+            activate_panel(p)
+            if vj ~= nil then
+                split_vertically(window, tab, tab_height, ipanes, ipanes[idx], panes, vpane)
+                activate_panel(p)
+            end
+        elseif vj ~= nil then
+            split_vertically(window, tab, tab_height, ipanes, ipanes[idx], panes, vpane)
+            activate_panel(p)
+            if hj ~= nil then
+                split_horizontally(window, tab, tab_width, ipanes, ipanes[idx], panes, hpane)
+            end
         end
     end
 

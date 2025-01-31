@@ -31,7 +31,7 @@ function pub.restore_pane(window, pane, pane_data)
             pane:send_text(pane_data.tty .. "\n")
         elseif pane_data.tty ~= "nil" then
             -- TODO - With running npm commands (e.g a running web client) this seems to execute Node, without the arguments
-            pane:send_text(pane_data.tty .. "\n")
+            -- pane:send_text(pane_data.tty .. "\n")
         end
     end
 end
