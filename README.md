@@ -80,13 +80,14 @@ and restore different sessions or better workspaces and later restore them.
 
 ## Limitations
 
-There are currently some limitations and improvements that need to be
-implemented:
+There are currently some limitations and improvements that need to be implemented:
 
-- The script does not restore the state of running applications within each pane
-  (except nvim on linux which seems to work fine but the general handling should
-  be improved)
-- It' primarily tested on Linux, expect some bugs or adjustements that need to be made
+- The script is a fork of the original [WezTerm Session Manager](https://github.com/danielcopper/wezterm-session-manager) created by [Daniel Copper](https://github.com/danielcopper),
+which had some limitations I tried to fix, but also it was tested both on linux and windows. On the contrary I'm only interested on linux and so new functionaliy won't be tested on windows.
+- The script tries to restore the running processes (only on mac/linux) in each pane, and it does this by inspecting the `proc` `cmdline` file. Probably this can be improved and probably 
+not all processes can be restored succesfully.
+- The script does not treat remote sessions in a special way at the moment, and for what I read, there are some differences in WezTerm available infos for remote sessions. So maybe this doesn't work well in this scenario. It works well on local and unix domains.
+- The script should be able to restore even complex workspaces layouts, but who knows :)
 
 ## Credits
 
