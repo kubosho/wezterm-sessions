@@ -20,6 +20,7 @@ function pub.retrieve_window_data(mux_window)
     return win_data
 end
 
+--- Restore a window from the provided window data.
 function pub.restore_window(window, win_data)
     local initial_pane = window:active_pane()
     local foreground_process = initial_pane:get_foreground_process_name()
