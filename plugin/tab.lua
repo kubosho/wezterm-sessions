@@ -22,6 +22,7 @@ function pub.retrieve_tab_data(tab)
     return tab_data
 end
 
+--- Restore a tab from the provided tab data.
 function pub.restore_tab(window, tab_data)
     local cwd_uri = tab_data.panes[1].cwd
     local cwd_path = fs.extract_path_from_dir(cwd_uri)
@@ -42,11 +43,13 @@ function pub.restore_tab(window, tab_data)
     -- end
 end
 
-local function find_horizontal_split(p, tab_data)
+--- Finds the panel data of the nearest horizontal split of the provided pane data
+--- @returns spanel table, idx number: the found panel_data and its index
+local function find_horizontal_split(pdata, tab_data)
     local spanel = nil
     local idx = nil
     for j, pane_data in ipairs(tab_data.panes) do
-        if pane_data.top == p.top and pane_data.left == (p.left + p.width + 1) then
+        if pane_data.top == pdata.top and pane_data.left == (pdata.left + pdata.width + 1) then
             spanel = pane_data
             idx = j
         end
@@ -54,11 +57,13 @@ local function find_horizontal_split(p, tab_data)
     return spanel, idx
 end
 
-local function find_vertical_split(p, tab_data)
+--- Finds the panel data of the nearest vertical split of the provided pane data
+--- @returns spanel table, idx number: the found panel_data and its index
+local function find_vertical_split(pdata, tab_data)
     local spanel = nil
     local idx = nil
     for j, pane_data in ipairs(tab_data.panes) do
-        if pane_data.left == p.left and pane_data.top == (p.top + p.height + 1) then
+        if pane_data.left == pdata.left and pane_data.top == (pdata.top + pdata.height + 1) then
             spanel = pane_data
             idx = j
         end
@@ -66,6 +71,9 @@ local function find_vertical_split(p, tab_data)
     return spanel, idx
 end
 
+--- Retrieves the width of the tab (in cells unit)
+--- @param tab_data table: The tab data table.
+--- @return number: The width of the tab.
 local function get_tab_width(tab_data)
     local width = 0
     for _, pane_data in ipairs(tab_data.panes) do
@@ -76,6 +84,9 @@ local function get_tab_width(tab_data)
     return width
 end
 
+--- Retrieves the height of the tab (in cells unit)
+--- @param tab_data table: The tab data table.
+--- @return number: The height of the tab.
 local function get_tab_height(tab_data)
     local height = 0
     for _, pane_data in ipairs(tab_data.panes) do
@@ -86,6 +97,14 @@ local function get_tab_height(tab_data)
     return height
 end
 
+--- Splits the active pane horizontally
+--- @param window unknown: The window to split the pane in.
+--- @param tab unknown: The tab to split the pane in.
+--- @param tab_width number: The width of the tab.
+--- @param ipanes table: The table of panes data stored for the tab
+--- @param ipane table: The pane data to be split
+--- @param panes table: The table of panes that have been restored so far.
+--- @param hpane table: The pane data of the pane that should be created splitting ipane
 local function split_horizontally(window, tab, tab_width, ipanes, ipane, panes, hpane)
     wezterm.log_info("Split horizontally", ipane.top, ipane.left)
     wezterm.log_info("Restoring pane", tab_width, ipane.left, hpane.left)
@@ -100,6 +119,14 @@ local function split_horizontally(window, tab, tab_width, ipanes, ipane, panes, 
     pane_mod.restore_pane(window, new_pane, hpane)
 end
 
+--- Splits the active pane vertically
+--- @param window unknown: The window to split the pane in.
+--- @param tab unknown: The tab to split the pane in.
+--- @param tab_height number: The width of the tab.
+--- @param ipanes table: The table of panes data stored for the tab
+--- @param ipane table: The pane data to be split
+--- @param panes table: The table of panes that have been restored so far.
+--- @param vpane table: The pane data of the pane that should be created splitting ipane
 local function split_vertically(window, tab, tab_height, ipanes, ipane, panes, vpane)
     wezterm.log_info("Split vertically", ipane.top, ipane.left)
     local available_height = tab_height - ipane.top
@@ -120,14 +147,18 @@ local function activate_panel(p)
 end
 
 
+--- Restores all tab panes from the provided tab data
 function pub.restore_panes(window, tab, tab_data)
-    -- keeps track of actually created panes
+    -- keeps track of actually created panes data
     local ipanes = { tab_data.panes[1] }
+    -- keeps track of restored panes
     local panes = { tab:active_pane() }
+
+    -- Tab dimensions (in cell unit)
     local tab_width = get_tab_width(tab_data)
     local tab_height = get_tab_height(tab_data)
 
-    -- sleep is needed to let pane focus have effect
+    -- Loop tp restore all panes
     for idx, p in ipairs(panes) do
         -- restore first pane
         if idx == 1 then
@@ -136,20 +167,22 @@ function pub.restore_panes(window, tab, tab_data)
 
         activate_panel(p)
 
+        -- Does the current pane have a horizontal or vertical split?
         local hpane, hj = find_horizontal_split(ipanes[idx], tab_data)
         local vpane, vj = find_vertical_split(ipanes[idx], tab_data)
 
-        if hj ~= nil and (vj == nil or vj < hj) then -- I though here should be vj < hj but it works this way
+        -- Now we try to understand from splits indexes which split should be performed first
+        if hpane ~= nil and (vj == nil or vj < hj) then -- I though here should be vj < hj but it works this way
             split_horizontally(window, tab, tab_width, ipanes, ipanes[idx], panes, hpane)
             activate_panel(p)
-            if vj ~= nil then
+            if vpane ~= nil then
                 split_vertically(window, tab, tab_height, ipanes, ipanes[idx], panes, vpane)
                 activate_panel(p)
             end
-        elseif vj ~= nil then
+        elseif vpane ~= nil then
             split_vertically(window, tab, tab_height, ipanes, ipanes[idx], panes, vpane)
             activate_panel(p)
-            if hj ~= nil then
+            if hpane ~= nil then
                 split_horizontally(window, tab, tab_width, ipanes, ipanes[idx], panes, hpane)
             end
         end

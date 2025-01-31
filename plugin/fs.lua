@@ -71,7 +71,7 @@ end
 
 --- Retrieve the path from the working directory
 --- @param working_directory string
---- @return string, integer
+--- @return string, number
 function fs.extract_path_from_dir(working_directory)
     if is_windows then
         -- On Windows, transform 'file:///C:/path/to/dir' to 'C:/path/to/dir'
