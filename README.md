@@ -25,7 +25,7 @@ In such cases you can manually set the `tty` string in the state file.
 
 ## Installation
 
-1. **Add to your wezterm config**
+**Add to your wezterm config**
 
    ```lua
     local sessions = wezterm.plugin.require("https://github.com/abidibo/wezterm-sessions")
@@ -34,7 +34,7 @@ In such cases you can manually set the `tty` string in the state file.
 
 ## Configuration
 
-2. **Event Bindings:** You can define your own keybindings:
+1. **Event Bindings:** You can define your own keybindings:
 
     ```lua
     -- there are the default ones
@@ -67,7 +67,7 @@ In such cases you can manually set the `tty` string in the state file.
     }
    ```
 
-3. I also recommend to set up a keybinding for creating **named** workspaces or rename the current one:
+2. I also recommend to set up a keybinding for creating **named** workspaces or rename the current one:
 
     ````lua 
     -- Rename current workspace
@@ -87,6 +87,19 @@ In such cases you can manually set the `tty` string in the state file.
     },
     ```
    
+## Events
+
+The following events are emitted:
+
+- `wezter-sessions.save.start(file_path)`
+- `wezter-sessions.save.end(file_path, res)`
+- `wezter-sessions.load.start(workspace_name)`
+- `wezter-sessions.load.end(workspace_name)`
+- `wezter-sessions.restore.start(workspace_name)`
+- `wezter-sessions.restore.end(workspace_name)`
+- `wezter-sessions.delete.start(file_path)`
+- `wezter-sessions.delete.end(file_path, res)`
+- `wezter-sessions.edit.start(file_path, editor)`
 
 ## Limitations
 

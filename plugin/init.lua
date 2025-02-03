@@ -51,7 +51,9 @@ local save_state_dir = plugin_dir .. separator .. get_require_path() .. separato
 --- Loads the saved json file matching the current workspace.
 function pub.restore_state(window)
     local workspace_name = window:active_workspace()
+	wezterm.emit("wezterm-sessions.restore.start", workspace_name)
     ws_mod.restore_workspace(window, save_state_dir, workspace_name)
+	wezterm.emit("wezterm-sessions.restore.end", workspace_name)
 end
 
 
@@ -63,6 +65,7 @@ function pub.load_state(window, pane)
         act.InputSelector({
             action = wezterm.action_callback(function(_, inner_pane, id, label)
                 if id and label then
+	                wezterm.emit("wezterm-sessions.load.start", label)
                     wezterm.log_info("Switching to ws: " .. label)
                     -- switch to workspace
                     window:perform_action(
@@ -91,7 +94,9 @@ end
 
 --- After the workspace switch is complete we restore the workspace
 wezterm.on("wezter-sessions-switch", function(window, _)
+    local workspace_name = window:active_workspace()
     pub.restore_state(window)
+	wezterm.emit("wezterm-sessions.load.end", workspace_name)
 end)
 
 --- Orchestrator function to save the current workspace state.
@@ -101,13 +106,16 @@ function pub.save_state(window)
 
     -- Construct the file path based on the workspace name
     local file_path = save_state_dir .. "wezterm_state_" .. fs_mod.escape_file_name(data.name) .. ".json"
+	wezterm.emit("wezterm-sessions.save.start", file_path)
 
     -- Save the workspace data to a JSON file and display the appropriate notification
-    if fs_mod.save_to_json_file(data, file_path) then
+    local res = fs_mod.save_to_json_file(data, file_path)
+    if res then
         window:toast_notification('WezTerm Sessions', 'Workspace state saved successfully', nil, 4000)
     else
         window:toast_notification('WezTerm Sessions', 'Failed to save workspace state', nil, 4000)
     end
+	wezterm.emit("wezterm-sessions.save.end", file_path, res)
 end
 
 --- Allows to select which workspace to delete
@@ -116,15 +124,19 @@ function pub.delete_state(window, pane)
 
     window:perform_action(
         act.InputSelector({
-            action = wezterm.action_callback(function(inner_window, inner_pane, id, label)
+            action = wezterm.action_callback(function(_, _, id, label)
                 if id and label then
                     wezterm.log_info("Deleting ws: " .. label)
                     local file_path = save_state_dir .. "wezterm_state_" .. fs_mod.escape_file_name(label) .. ".json"
-                    if fs_mod.delete_json_file(file_path) then
+	                wezterm.emit("wezterm-sessions.delete.start", file_path)
+
+                    local res = fs_mod.delete_json_file(file_path)
+                    if res then
                         window:toast_notification('WezTerm Sessions', 'Workspace state deleted successfully', nil, 4000)
                     else
                         window:toast_notification('WezTerm Sessions', 'Failed to delete workspace state', nil, 4000)
                     end
+	                wezterm.emit("wezterm-sessions.delete.end", file_path, res)
                 end
             end),
             title = "Choose Workspace to delete",
@@ -143,7 +155,7 @@ function pub.edit_state(window, pane)
 
     window:perform_action(
         act.InputSelector({
-            action = wezterm.action_callback(function(inner_window, inner_pane, id, label)
+            action = wezterm.action_callback(function(_, inner_pane, id, label)
                 if id and label then
                     wezterm.log_info("Editing ws: " .. label)
                     local file_path = save_state_dir .. "wezterm_state_" .. fs_mod.escape_file_name(label) .. ".json"
@@ -151,6 +163,7 @@ function pub.edit_state(window, pane)
                     if not editor then
                         editor = "nvim"
                     end
+	                wezterm.emit("wezterm-sessions.edit.start", file_path, editor)
                     local command = string.format("%s %s\n", editor, file_path)
                     inner_pane:send_text(command)
                 end
