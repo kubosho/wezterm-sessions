@@ -1,11 +1,11 @@
 # WezTerm Sessions
 
-The [WezTerm](https://wezfurlong.org/wezterm/) Sessions is a Lua script
-enhancement for WezTerm that provides functionality to save, load, and restore
-terminal sessions. This tool helps manage terminal sessions, its goal is to save
-and restore different sessions or better workspaces and later restore them.
+The [WezTerm](https://wezfurlong.org/wezterm/) Sessions is a Lua script enhancement for WezTerm that provides functionality to save, load, restore, edit and delete terminal sessions.
 
 ![WezTerm Sessions](./screen.gif)
+
+> [!NOTE]
+> While layout saving/loading/restoring should work on Windows, all new functionality are tested only on Linux. Processes restoring, state editing etc... are supported only on Linux and (untested) on macOS.
 
 ## Features
 
