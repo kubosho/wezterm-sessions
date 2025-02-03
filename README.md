@@ -17,6 +17,11 @@ and restore different sessions or better workspaces and later restore them.
   load, regardless of the current workspace name.
 - **Delete Session State** Allows selecting which saved session to
   delete, regardless of the current workspace name.
+- **Edit Session State** Allows selecting which saved session to
+  edit, the json file is opened in the `$EDITOR` environment variable, or `nvim` if not set.
+
+Edit a state can be useful if you find that the foreground processes of the session are not restored correctly.  
+In such cases you can manually set the `tty` string in the state file.
 
 ## Installation
 
@@ -53,6 +58,11 @@ and restore different sessions or better workspaces and later restore them.
             key = 'd',
             mods = 'CTRL|SHIFT',
             action = act({ EmitEvent = "delete_session" }),
+        },
+        {
+            key = 'e',
+            mods = 'CTRL|SHIFT',
+            action = act({ EmitEvent = "edit_session" }),
         },
     }
    ```

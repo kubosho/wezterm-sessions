@@ -137,6 +137,34 @@ function pub.delete_state(window, pane)
     )
 end
 
+--- Allows to select which workspace state to edit in favourite editor
+function pub.edit_state(window, pane)
+    local choices = ws_mod.get_workspaces(save_state_dir)
+
+    window:perform_action(
+        act.InputSelector({
+            action = wezterm.action_callback(function(inner_window, inner_pane, id, label)
+                if id and label then
+                    wezterm.log_info("Editing ws: " .. label)
+                    local file_path = save_state_dir .. "wezterm_state_" .. fs_mod.escape_file_name(label) .. ".json"
+                    local editor = os.getenv("EDITOR")
+                    if not editor then
+                        editor = "nvim"
+                    end
+                    local command = string.format("%s %s\n", editor, file_path)
+                    inner_pane:send_text(command)
+                end
+            end),
+            title = "Choose Workspace state to edit",
+            description = "Select a workspace and press Enter = accept, Esc = cancel, / = filter",
+            fuzzy_description = "Workspace to edit: ",
+            choices = choices,
+            fuzzy = true,
+        }),
+        pane
+    )
+end
+
 ---Sets default keybindings
 function pub.apply_to_config(config)
     if config == nil then
@@ -167,6 +195,11 @@ function pub.apply_to_config(config)
         mods = 'CTRL|SHIFT',
         action = act({ EmitEvent = "delete_session" }),
     })
+    table.insert(config.keys, {
+        key = 'e',
+        mods = 'CTRL|SHIFT',
+        action = act({ EmitEvent = "edit_session" }),
+    })
 end
 
 --- Event handlers
@@ -174,5 +207,6 @@ wezterm.on("save_session", function(window) pub.save_state(window) end)
 wezterm.on("load_session", function(window, pane) pub.load_state(window, pane) end)
 wezterm.on("restore_session", function(window) pub.restore_state(window) end)
 wezterm.on("delete_session", function(window, pane) pub.delete_state(window, pane) end)
+wezterm.on("edit_session", function(window, pane) pub.edit_state(window, pane) end)
 
 return pub
