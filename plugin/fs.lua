@@ -69,17 +69,33 @@ function fs.unescape_file_name(file_name)
     return s
 end
 
+function fs.replace(str, what, with)
+    what = string.gsub(what, "[%(%)%.%+%-%*%?%[%]%^%$%%]", "%%%1") -- escape pattern
+    with = string.gsub(with, "[%%]", "%%%%") -- escape replacement
+    return string.gsub(str, what, with)
+end
+
 --- Retrieve the path from the working directory
 --- @param working_directory string
+--- @param domain string
 --- @return string, number
-function fs.extract_path_from_dir(working_directory)
-    if is_windows then
+function fs.extract_path_from_dir(working_directory, domain)
+    local is_ssh = domain:find("SSHMUX", 1, true)
+    local hostname = wezterm.hostname()
+
+    if is_windows then -- TODO: windows
         -- On Windows, transform 'file:///C:/path/to/dir' to 'C:/path/to/dir'
         return working_directory:gsub("file:///", "")
     elseif is_linux then
-        -- On Linux, transform 'file://{computer-name}/home/{user}/path/to/dir' to '/home/{user}/path/to/dir'
-        return working_directory:gsub("^.*(/home/)", "/home/")
-    else
+        if not is_ssh then
+            -- local path
+            return fs.replace(working_directory, "file://" .. hostname, "")
+        else
+            -- ssh path
+            local ssh_host = domain:match("SSHMUX:(.*)")
+            return working_directory:gsub("file://" .. ssh_host, "")
+        end
+    else -- TODO: macOS
         return working_directory:gsub("^.*(/Users/)", "/Users/")
     end
 end

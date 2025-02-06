@@ -12,14 +12,16 @@ function pub.retrieve_pane_data(pane_info)
     local tty = tostring(pane_info.pane:get_foreground_process_name())
     -- we try to read process infoo in cmdline proc file to get the full command
     local pinfo = pane_info.pane:get_foreground_process_info()
-    local cmdline_path = "/proc/" .. pinfo.pid .. "/cmdline"
-    local file = io.open(cmdline_path, "r")
-    -- And if we find the file we use this as tty
-    if file then
-        local cmdline = file:read("*a")  -- Read the entire file
-        file:close()
-        -- Replace null characters with spaces
-        tty = cmdline:gsub("\0", " ")
+    if pinfo ~= nil then
+        local cmdline_path = "/proc/" .. pinfo.pid .. "/cmdline"
+        local file = io.open(cmdline_path, "r")
+        -- And if we find the file we use this as tty
+        if file then
+            local cmdline = file:read("*a")  -- Read the entire file
+            file:close()
+            -- Replace null characters with spaces
+            tty = cmdline:gsub("\0", " ")
+        end
     end
 
     return {
@@ -55,7 +57,7 @@ function pub.restore_pane(_, pane, pane_data)
             pane_data.tty:find("nu") or
             pane_data.tty:find("zsh") then
             -- do nothing, we already have a shell
-        else
+        elseif pane_data.tty ~= "nil" then
             pane:send_text(pane_data.tty .. "\n")
         end
     end

@@ -24,8 +24,10 @@ end
 
 --- Restore a tab from the provided tab data.
 function pub.restore_tab(window, tab_data)
+    local initial_pane = window:active_pane()
+    local domain = initial_pane:get_domain_name()
     local cwd_uri = tab_data.panes[1].cwd
-    local cwd_path = fs.extract_path_from_dir(cwd_uri)
+    local cwd_path = fs.extract_path_from_dir(cwd_uri, domain)
 
     local new_tab = window:mux_window():spawn_tab({ cwd = cwd_path })
     if not new_tab then
@@ -111,7 +113,7 @@ local function split_horizontally(window, tab, tab_width, ipanes, ipane, panes, 
     local available_width = tab_width - ipane.left
     local new_pane = tab:active_pane():split({
         direction = 'Right',
-        cwd = fs.extract_path_from_dir(hpane.cwd),
+        cwd = fs.extract_path_from_dir(hpane.cwd, tab:active_pane():get_domain_name()),
         size = 1 - ((hpane.left - ipane.left) / available_width)
     })
     table.insert(ipanes, hpane)
@@ -132,7 +134,7 @@ local function split_vertically(window, tab, tab_height, ipanes, ipane, panes, v
     local available_height = tab_height - ipane.top
     local new_pane = tab:active_pane():split({
         direction = 'Bottom',
-        cwd = fs.extract_path_from_dir(vpane.cwd),
+        cwd = fs.extract_path_from_dir(vpane.cwd, tab:active_pane():get_domain_name()),
         size = 1 - ((vpane.top - ipane.top) / available_height)
     })
     table.insert(ipanes, vpane)
