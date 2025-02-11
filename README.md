@@ -116,15 +116,15 @@ In such cases you can manually set the `tty` string in the state file.
 
 The following events are emitted:
 
-- `wezter-sessions.save.start(file_path)`
-- `wezter-sessions.save.end(file_path, res)`
-- `wezter-sessions.load.start(workspace_name)`
-- `wezter-sessions.load.end(workspace_name)`
-- `wezter-sessions.restore.start(workspace_name)`
-- `wezter-sessions.restore.end(workspace_name)`
-- `wezter-sessions.delete.start(file_path)`
-- `wezter-sessions.delete.end(file_path, res)`
-- `wezter-sessions.edit.start(file_path, editor)`
+- `wezterm-sessions.save.start(file_path)`
+- `wezterm-sessions.save.end(file_path, res)`
+- `wezterm-sessions.load.start(workspace_name)`
+- `wezterm-sessions.load.end(workspace_name)`
+- `wezterm-sessions.restore.start(workspace_name)`
+- `wezterm-sessions.restore.end(workspace_name)`
+- `wezterm-sessions.delete.start(file_path)`
+- `wezterm-sessions.delete.end(file_path, res)`
+- `wezterm-sessions.edit.start(file_path, editor)`
 
 ## Limitations
 
