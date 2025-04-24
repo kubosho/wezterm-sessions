@@ -9,6 +9,7 @@ local pub = {}
 function pub.retrieve_tab_data(tab)
     local tab_data = {
         tab_id = tostring(tab:tab_id()),
+		title = tab:get_title(),
         panes = {}
     }
 
@@ -34,6 +35,10 @@ function pub.restore_tab(window, tab_data)
         wezterm.log_info("Failed to create a new tab.")
         return
     end
+
+	if tab_data.title then
+		new_tab:set_title(tab_data.title)
+	end
 
     -- Activate the new tab before creating panes
     new_tab:activate()
