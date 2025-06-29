@@ -61,7 +61,7 @@ local save_state_dir = plugin_dir .. separator .. get_require_path() .. separato
 function pub.restore_state(window)
   local workspace_name = window:active_workspace()
   wezterm.emit("wezterm-sessions.restore.start", workspace_name)
-  ws_mod.restore_workspace(window, save_state_dir, workspace_name)
+  ws_mod.restore_workspace(window, save_state_dir, workspace_name, pub.config)
   wezterm.emit("wezterm-sessions.restore.end", workspace_name)
 end
 
@@ -116,9 +116,9 @@ function pub.save_state(window)
   -- Save the workspace data to a JSON file and display the appropriate notification
   local res = fs_mod.save_to_json_file(data, file_path)
   if res then
-    window:toast_notification("WezTerm Sessions", "Workspace state saved successfully", nil, 4000)
+    utils.notify(window, "Workspace state saved successfully", pub.config)
   else
-    window:toast_notification("WezTerm Sessions", "Failed to save workspace state", nil, 4000)
+    utils.notify(window, "Failed to save workspace state", pub.config)
   end
   wezterm.emit("wezterm-sessions.save.end", file_path, res)
 end
@@ -137,9 +137,9 @@ function pub.delete_state(window, pane)
 
           local res = fs_mod.delete_json_file(file_path)
           if res then
-            window:toast_notification("WezTerm Sessions", "Workspace state deleted successfully", nil, 4000)
+            utils.notify(window, "Workspace state deleted successfully", pub.config)
           else
-            window:toast_notification("WezTerm Sessions", "Failed to delete workspace state", nil, 4000)
+            utils.notify(window, "Failed to delete workspace state", pub.config)
           end
           wezterm.emit("wezterm-sessions.delete.end", file_path, res)
         end
