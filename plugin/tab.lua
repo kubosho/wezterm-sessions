@@ -1,6 +1,9 @@
 local wezterm = require("wezterm")
 local fs = require("plugin.fs")
+wezterm.log_info("Loading pane module...")
 local pane_mod = require("plugin.pane")
+wezterm.log_info("Pane module loaded:", pane_mod)
+wezterm.log_info("retrieve_pane_data function:", pane_mod.retrieve_pane_data)
 local pub = {}
 
 --- Retrieves tab data
