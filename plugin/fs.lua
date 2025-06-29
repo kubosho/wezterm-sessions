@@ -1,8 +1,9 @@
 local wezterm = require("wezterm")
+local utils = require("utils")
 local fs = {}
 
---- checks if the user is on windows
-local is_windows = wezterm.target_triple == "x86_64-pc-windows-msvc"
+--- checks if the user is on windows/linux
+local is_windows = utils.is_windows()
 local is_linux = wezterm.target_triple == "x86_64-unknown-linux-gnu"
 local separator = is_windows and "\\" or "/"
 
