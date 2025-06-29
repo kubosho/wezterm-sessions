@@ -7,9 +7,8 @@ local pub = {}
 --- wezterm plugin directory
 local plugin_dir
 
---- checks if the user is on windows
-local is_windows = wezterm.target_triple == "x86_64-pc-windows-msvc"
-local separator = is_windows and "\\" or "/"
+--- OS path separator
+local separator = wezterm.target_triple:find("windows") and "\\" or "/"
 
 --- Checks if the plugin directory exists
 --- @return boolean
