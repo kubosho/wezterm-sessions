@@ -1,8 +1,9 @@
 local wezterm = require("wezterm")
+local utils = require("utils")
 local fs = {}
 
---- checks if the user is on windows
-local is_windows = wezterm.target_triple == "x86_64-pc-windows-msvc"
+--- checks if the user is on windows/linux
+local is_windows = utils.is_windows()
 local is_linux = wezterm.target_triple == "x86_64-unknown-linux-gnu"
 local separator = is_windows and "\\" or "/"
 
@@ -99,5 +100,8 @@ function fs.extract_path_from_dir(working_directory, domain)
         return working_directory:gsub("^.*(/Users/)", "/Users/")
     end
 end
+
+--- Export is_windows for backward compatibility
+fs.is_windows = is_windows
 
 return fs
