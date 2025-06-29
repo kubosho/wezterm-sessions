@@ -101,7 +101,4 @@ function fs.extract_path_from_dir(working_directory, domain)
     end
 end
 
---- Export is_windows for backward compatibility
-fs.is_windows = is_windows
-
 return fs
