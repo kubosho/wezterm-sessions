@@ -183,8 +183,17 @@ function pub.edit_state(window, pane)
   )
 end
 
----Sets default keybindings
-function pub.apply_to_config(config)
+---Sets default keybindings and applies configuration options
+---@param config table: WezTerm configuration table
+---@param options table: Optional settings for the plugin
+function pub.apply_to_config(config, options)
+  -- Merge user options with default config
+  if options then
+    for k, v in pairs(options) do
+      pub.config[k] = v
+    end
+  end
+
   if config == nil then
     config = {}
   end
