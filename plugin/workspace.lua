@@ -89,11 +89,20 @@ end
 --- @return table
 function pub.get_workspaces(dir)
   local choices = {}
-  for d in io.popen("ls -pa " .. dir .. " | grep -v /"):lines() do
-    if string.find(d, "wezterm_state_") then
-      local w = d:gsub("wezterm_state_", "")
-      w = w:gsub(".json", "")
-      table.insert(choices, { id = d, label = fs.unescape_file_name(w) })
+
+  -- Use wezterm.read_dir for cross-platform compatibility
+  local success, entries = pcall(wezterm.read_dir, dir)
+  if not success then
+    wezterm.log_info("Failed to read directory: " .. dir)
+    return choices
+  end
+
+  for _, entry in ipairs(entries) do
+    local filename = entry.name
+    if string.find(filename, "wezterm_state_") and string.find(filename, "%.json$") then
+      local w = filename:gsub("wezterm_state_", "")
+      w = w:gsub("%.json$", "")
+      table.insert(choices, { id = filename, label = fs.unescape_file_name(w) })
     end
   end
   return choices

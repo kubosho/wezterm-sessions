@@ -6,6 +6,10 @@ function utils.is_windows()
   return wezterm.target_triple:find("windows") ~= nil
 end
 
+function utils.is_macos()
+  return wezterm.target_triple:find("darwin") ~= nil
+end
+
 --- Displays a notification with the specified message based on configuration.
 --- @param window wezterm.Window: The window to display the notification in
 --- @param message string: The message to display
