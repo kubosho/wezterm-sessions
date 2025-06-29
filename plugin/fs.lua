@@ -2,8 +2,9 @@ local wezterm = require("wezterm")
 local utils = require("utils")
 local fs = {}
 
---- checks if the user is on windows/linux
+--- checks if the user is on windows/macos/linux
 local is_windows = utils.is_windows()
+local is_macos = utils.is_macos()
 local is_linux = wezterm.target_triple == "x86_64-unknown-linux-gnu"
 local separator = is_windows and "\\" or "/"
 
@@ -96,8 +97,32 @@ function fs.extract_path_from_dir(working_directory, domain)
       local ssh_host = domain:match("SSHMUX:(.*)")
       return working_directory:gsub("file://" .. ssh_host, "")
     end
-  else -- TODO: macOS
-    return working_directory:gsub("^.*(/Users/)", "/Users/")
+  elseif is_macos then
+    if not is_ssh then
+      -- local path on macOS
+      -- Handle file:// URI format: file://hostname/path or file:///path
+      local path = working_directory:gsub("^file://[^/]*/", "/")
+      if path == working_directory then
+        -- fallback: extract path starting with /Users/ or /
+        path = working_directory:gsub("^.*(/Users/)", "/Users/")
+        if path == working_directory then
+          -- try to extract any absolute path
+          path = working_directory:match("(/[^%s]*)")
+        end
+      end
+      return path or working_directory
+    else
+      -- ssh path on macOS
+      local ssh_host = domain:match("SSHMUX:(.*)")
+      if ssh_host then
+        return working_directory:gsub("file://" .. ssh_host, "")
+      else
+        return working_directory
+      end
+    end
+  else
+    -- fallback for other platforms
+    return working_directory:gsub("^.*(/[^%s]*)", "%1")
   end
 end
 

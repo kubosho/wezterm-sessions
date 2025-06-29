@@ -15,17 +15,32 @@ function pub.retrieve_pane_data(pane_info)
 
   -- default command line from process name
   local tty = tostring(pane_info.pane:get_foreground_process_name())
-  -- we try to read process infoo in cmdline proc file to get the full command
+  -- we try to read process info to get the full command
   local pinfo = pane_info.pane:get_foreground_process_info()
   if pinfo ~= nil then
-    local cmdline_path = "/proc/" .. pinfo.pid .. "/cmdline"
-    local file = io.open(cmdline_path, "r")
-    -- And if we find the file we use this as tty
-    if file then
-      local cmdline = file:read("*a") -- Read the entire file
-      file:close()
-      -- Replace null characters with spaces
-      tty = cmdline:gsub("\0", " ")
+    if utils.is_macos() then
+      -- On macOS, use ps command to get full command line
+      local ps_cmd = string.format("ps -p %d -o command=", pinfo.pid)
+      local ps_handle = io.popen(ps_cmd)
+      if ps_handle then
+        local cmdline = ps_handle:read("*a")
+        ps_handle:close()
+        if cmdline and cmdline ~= "" then
+          -- Remove trailing newline
+          tty = cmdline:gsub("\n$", "")
+        end
+      end
+    else
+      -- Linux: read from /proc/*/cmdline
+      local cmdline_path = "/proc/" .. pinfo.pid .. "/cmdline"
+      local file = io.open(cmdline_path, "r")
+      -- And if we find the file we use this as tty
+      if file then
+        local cmdline = file:read("*a") -- Read the entire file
+        file:close()
+        -- Replace null characters with spaces
+        tty = cmdline:gsub("\0", " ")
+      end
     end
   end
 

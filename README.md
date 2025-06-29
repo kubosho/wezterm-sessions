@@ -5,7 +5,7 @@ The [WezTerm](https://wezfurlong.org/wezterm/) Sessions is a Lua script enhancem
 ![WezTerm Sessions](./screen.gif)
 
 > [!NOTE]
-> While layout saving/loading/restoring should work on Windows, all new functionality are tested only on Linux. Processes restoring, state editing etc... are supported only on Linux and (untested) on macOS.
+> Layout saving/loading/restoring works on Windows, Linux, and macOS. Process restoring and state editing are supported on Linux and macOS. All functionality has been tested on Linux and macOS.
 
 ## Features
 
@@ -86,7 +86,7 @@ In such cases you can manually set the `tty` string in the state file.
 
 3. I also recommend to set up a keybinding for creating **named** workspaces or rename the current one:
 
-   ````lua
+   ```lua
    -- Rename current workspace
    {
        key = '$',
@@ -128,7 +128,6 @@ In such cases you can manually set the `tty` string in the state file.
        },
    },
    ```
-   ````
 
 ## Events
 
@@ -149,9 +148,8 @@ The following events are emitted:
 There are currently some limitations and improvements that need to be implemented:
 
 - The script is a fork of the original [WezTerm Session Manager](https://github.com/danielcopper/wezterm-session-manager) created by [Daniel Copper](https://github.com/danielcopper),
-  which had some limitations I tried to fix, but also it was tested both on linux and windows. On the contrary I'm only interested on linux and so new functionality won't be tested on windows (if windows users are willing to help, they're welcome).
-- The script tries to restore the running processes (only on mac/linux) in each pane, and it does this by inspecting the `proc` `cmdline` file. Probably this can be improved and probably
-  not all processes can be restored succesfully.
+  which had some limitations that have been fixed. Basic functionality works on Windows, Linux, and macOS, while advanced features like process restoration are supported on Linux and macOS.
+- The script tries to restore the running processes (on macOS/Linux) in each pane. On Linux, it inspects the `/proc/*/cmdline` file. On macOS, it uses the `ps` command. This can be improved and not all processes may be restored successfully.
 - The script does not treat remote sessions in a special way at the moment, and for what I read, there are some differences in WezTerm available infos for remote sessions. So maybe this doesn't work well in this scenario. It works well on local and unix domains.
 - The script should be able to restore even complex workspaces layouts, but who knows :)
 
