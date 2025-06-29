@@ -1,6 +1,6 @@
 local wezterm = require("wezterm")
-local fs = require("fs")
-local pane_mod = require("pane")
+local fs = require("plugin.fs")
+local pane_mod = require("plugin.pane")
 local pub = {}
 
 --- Retrieves tab data

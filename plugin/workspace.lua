@@ -1,7 +1,7 @@
 local wezterm = require("wezterm")
-local fs = require("fs")
-local win_mod = require("window")
-local utils = require("utils")
+local fs = require("plugin.fs")
+local win_mod = require("plugin.window")
+local utils = require("plugin.utils")
 
 local pub = {}
 

@@ -1,5 +1,5 @@
 local wezterm = require("wezterm")
-local tab_mod = require("tab")
+local tab_mod = require("plugin.tab")
 local pub = {}
 
 --- Retrieves the current window data from the provided mux window.

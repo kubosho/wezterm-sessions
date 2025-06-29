@@ -1,6 +1,6 @@
 local wezterm = require("wezterm")
-local fs = require("fs")
-local utils = require("utils")
+local fs = require("plugin.fs")
+local utils = require("plugin.utils")
 local pub = {}
 
 --- Retrieve pane data
