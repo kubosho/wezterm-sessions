@@ -5,9 +5,6 @@ local utils = require('utils')
 
 local pub = {}
 
---- Checks if the user is on windows
-local is_windows = wezterm.target_triple == "x86_64-pc-windows-msvc"
-
 --- Retrieves the current workspace data from the active window.
 -- @param window wezterm.Window: The active window to retrieve the workspace data from.
 -- @return table or nil: The workspace data table or nil if no active window is found.
