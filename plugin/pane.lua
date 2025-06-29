@@ -1,5 +1,6 @@
 local wezterm = require("wezterm")
 local fs = require('fs')
+local utils = require('utils')
 local pub = {}
 
 --- Retrieve pane data
@@ -49,7 +50,7 @@ function pub.restore_pane(_, pane, pane_data)
     -- Restore TTY for Neovim on Linux
     -- NOTE: cwd is handled differently on windows. maybe extend functionality for windows later
     -- This could probably be handled better in general
-    if not (fs.is_windows) then
+    if not (utils.is_windows()) then
         if pane_data.tty:find("sh") or
             pane_data.tty:find("cmd.exe") or
             pane_data.tty:find("powershell.exe") or
